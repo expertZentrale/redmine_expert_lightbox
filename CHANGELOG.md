@@ -1,0 +1,45 @@
+# Changelog – redmine_expert_lightbox
+
+> 🇬🇧 English version · [Deutsche Version](CHANGELOG.de.md)
+>
+> EN is authoritative — release notes are generated from this file.
+
+## [Unreleased]
+
+### Added
+- **Click zones on the left and right edge of the picture** step through the gallery, the way
+  common image galleries do. They are invisible until hovered, when a soft gradient and a large
+  `‹` / `›` chevron fade in; on touch devices, which have no hover, the chevrons stay visible.
+  Images only — over a PDF the zones would swallow the embedded viewer's own scrolling and
+  toolbar clicks, so there the top bar buttons remain the way to navigate.
+- **Horizontal swipe navigation** on touch and pen: swiping left shows the next attachment,
+  swiping right the previous one. Mostly-vertical drags still scroll, and mouse drags are left
+  alone. Built on Pointer Events, so no separate touch code path.
+- **`LICENSE` file (GPL-2.0-or-later)** — the plugin is now explicitly licensed under the GNU
+  General Public License v2 or later, matching Redmine itself. Adds a copyright/license header to
+  `init.rb` and expands the **License** section in `README.md` / `README.de.md`. No third-party
+  components are bundled.
+
+## [1.0.0] 2026-07-27 (1)
+
+### Added
+- **Modal preview for image and PDF attachments**, replacing the no-longer-compatible
+  `redmine_x_lightbox2`. Supports Redmine 5.1 through 7.0.
+- **Gallery navigation**: all previewable attachments on a page are collected in
+  document order (deduped by attachment id); `←` / `→` step through them.
+- **`ExpertLightboxController#inline`** (`/expert_lightbox/inline/:id/:filename`) serves
+  previewable attachments with `Content-Disposition: inline` so PDFs can render in an
+  `<iframe>`. Extension allowlist + `X-Content-Type-Options: nosniff`; visibility is
+  checked with core's `Attachment#visible?`.
+- English and German locales for the dialog's labels.
+
+### Notes on the implementation
+- **No view override and no `AttachmentsController` patch.** Detection is a single
+  delegated click listener keyed on attachment *URL* shape, so nothing depends on
+  core's attachment markup, CSS classes or icon fonts — the two things that broke the
+  previous plugin on Redmine 6/7.
+- **No third-party dependencies**: vanilla JS with a native `<dialog>`, no jQuery, no
+  Fancybox, no build step. Browsers without `<dialog>` support fall back to normal
+  navigation.
+- Assets are loaded on every page via `view_layouts_base_html_head` rather than a
+  per-controller allowlist; the script is inert until a matching link is clicked.
