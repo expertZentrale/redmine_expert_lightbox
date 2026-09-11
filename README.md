@@ -2,6 +2,8 @@
 
 # Redmine expert Lightbox
 
+[![CI](https://github.com/expertZentrale/redmine_expert_lightbox/actions/workflows/ci.yml/badge.svg)](https://github.com/expertZentrale/redmine_expert_lightbox/actions/workflows/ci.yml) [![Docker image smoke test](https://github.com/expertZentrale/redmine_expert_lightbox/actions/workflows/docker-image.yml/badge.svg)](https://github.com/expertZentrale/redmine_expert_lightbox/actions/workflows/docker-image.yml)
+
 Preview image and PDF attachments in a modal dialog instead of navigating away or
 downloading them. Works on **Redmine 5.1, 6.0, 6.1 and 7.0**.
 

@@ -4,7 +4,7 @@
 >
 > Maßgeblich ist die englische Fassung; diese Datei ist der deutsche Spiegel.
 
-## [Unreleased]
+## [1.1.0] 2026-09-11
 
 ### Hinzugefügt
 - **Klickflächen am linken und rechten Bildrand** blättern durch die Galerie, so wie man es von

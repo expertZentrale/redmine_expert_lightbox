@@ -4,7 +4,7 @@
 >
 > EN is authoritative — release notes are generated from this file.
 
-## [Unreleased]
+## [1.1.0] 2026-09-11
 
 ### Added
 - **Click zones on the left and right edge of the picture** step through the gallery, the way
