@@ -8,6 +8,15 @@ class ExpertLightboxControllerTest < Redmine::ControllerTest
 
   def setup
     User.current = nil
+    # `inline` refuses to serve an attachment whose file is not on disk
+    # (Attachment#readable?). Redmine's fixtures only describe the rows; the
+    # matching files live under test/fixtures/files, and the storage path has to
+    # be pointed at them or every fixture attachment 404s.
+    set_fixtures_attachments_directory
+  end
+
+  def teardown
+    set_tmp_attachments_directory
   end
 
   def test_inline_image_is_served_inline

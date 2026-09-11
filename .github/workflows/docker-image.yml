@@ -102,27 +102,36 @@ jobs:
       - name: Assert the head hook injected the lightbox
         run: |
           curl -sS http://localhost:3000/login -o page.html
-          for needle in 'expert-lightbox-config' 'expert_lightbox.js' 'expert_lightbox.css'; do
-            grep -q "$needle" page.html || {
-              echo "Rendered page is missing $needle - the head hook did not run:"
-              sed -n '1,60p' page.html
-              docker logs redmine
-              exit 1
-            }
-          done
+          fail() {
+            echo "$1"
+            sed -n '1,60p' page.html
+            docker logs redmine
+            exit 1
+          }
+          grep -q 'expert-lightbox-config' page.html \
+            || fail "Rendered page has no config island - the head hook did not run:"
+          # Redmine 6 and 7 fingerprint plugin assets (expert_lightbox-<digest>.js)
+          # while 5.1 serves them under the plain name, so match the stem and let
+          # the digest vary.
+          grep -Eq 'expert_lightbox[^"]*\.js' page.html \
+            || fail "Rendered page does not reference the lightbox script:"
+          grep -Eq 'expert_lightbox[^"]*\.css' page.html \
+            || fail "Rendered page does not reference the lightbox stylesheet:"
           echo "Head hook injected config island, script and stylesheet."
 
-      - name: Assert the plugin assets are served
+      - name: Assert the referenced assets are actually served
         run: |
-          for asset in \
-            /plugin_assets/redmine_expert_lightbox/javascripts/expert_lightbox.js \
-            /plugin_assets/redmine_expert_lightbox/stylesheets/expert_lightbox.css
-          do
+          # Take the URLs out of the page rather than guessing them: both the
+          # plugin_assets layout and the digest move between 5.1 and 7.0, and a
+          # hard-coded path would test the guess instead of the plugin.
+          grep -oE '/[^"]*expert_lightbox[^"]*\.(js|css)' page.html | sort -u > assets.txt
+          [ -s assets.txt ] || { echo "No asset URLs in the page"; exit 1; }
+          while read -r asset; do
             code=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:3000${asset}" || true)
             echo "GET ${asset} -> HTTP $code"
             [ "$code" = "200" ] || {
               echo "Plugin asset was not served"; docker logs redmine; exit 1; }
-          done
+          done < assets.txt
 
       # The inline endpoint must refuse an extension that is not on its
       # allowlist. Attachment 1 does not exist on a fresh install either, so a
