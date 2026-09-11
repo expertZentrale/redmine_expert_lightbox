@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/expertZentrale/redmine_expert_lightbox/blob/main/README.md
+    about: Installation, supported attachment types and how detection works.
+  - name: Changelog
+    url: https://github.com/expertZentrale/redmine_expert_lightbox/blob/main/CHANGELOG.md
+    about: What changed in each release.
