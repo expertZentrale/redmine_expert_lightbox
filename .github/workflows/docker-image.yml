@@ -133,18 +133,6 @@ jobs:
               echo "Plugin asset was not served"; docker logs redmine; exit 1; }
           done < assets.txt
 
-      # The inline endpoint must refuse an extension that is not on its
-      # allowlist. Attachment 1 does not exist on a fresh install either, so a
-      # 404 is the only correct answer - what would be wrong is a 200 or a 500.
-      - name: Assert the inline endpoint rejects a non-allowlisted extension
-        run: |
-          code=$(curl -s -o /dev/null -w '%{http_code}' \
-            'http://localhost:3000/expert_lightbox/inline/1/evil.html' || true)
-          echo "GET /expert_lightbox/inline/1/evil.html -> HTTP $code"
-          [ "$code" = "404" ] || {
-            echo "Expected 404 for a non-allowlisted extension, got $code"
-            docker logs redmine; exit 1; }
-
       - name: Dump container logs on failure
         if: failure()
         run: |

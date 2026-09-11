@@ -9,7 +9,9 @@ body:
       options:
         - label: I am running the latest release of the plugin
           required: true
-        - label: The plugin migration was run (rake redmine:plugins:migrate NAME=redmine_expert_lightbox)
+        - label: Redmine was restarted after installing the plugin (it ships no migrations, so there is nothing to migrate)
+          required: true
+        - label: No other lightbox plugin is installed alongside it
           required: true
 
   - type: textarea
