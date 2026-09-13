@@ -4,7 +4,7 @@
 #
 # The plugin has no pages of its own — it is a click handler that opens
 # attachments in a dialog — so what a screenshot needs is somewhere with
-# attachments worth :clicking => an issue carrying images and a PDF, a wiki page
+# attachments worth clicking: an issue carrying images and a PDF, a wiki page
 # with an inline image, and a Files entry.
 #
 # Run it against the parent repo's docker-compose.screenshots.yml, not the dev
@@ -17,7 +17,7 @@
 # `expert_lightbox_screenshot_backup`, and scripts/teardown_screenshot_demo.rb
 # removes exactly those rows.
 #
-# The attachments come from scripts/demo-assets/ and are all :synthetic => an
+# The attachments come from scripts/demo-assets/ and are all synthetic: an
 # invented error dialog, an invented type plate, an invented topology and an
 # invented inspection report.
 #
@@ -153,7 +153,7 @@ ASSET_DESCRIPTIONS.each do |filename, description|
 end
 say "created issue ##{issue.id} with #{issue.reload.attachments.count} attachments"
 
-# A plain journal note, no attachment of its :own => a fifth attachment would make
+# A plain journal note, no attachment of its own: a fifth attachment would make
 # the gallery read "1 / 5" and contradict the counter in the screenshots.
 journal = issue.init_journal(user, 'Replacement power supply fitted — the message is unchanged.')
 journal.save!

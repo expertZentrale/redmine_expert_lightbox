@@ -39,9 +39,18 @@ projects.destroy_all
 # the capture user authored whose container no longer exists - authored-by keeps
 # this from ever reaching an attachment the demo did not create.
 if backup['user_id']
-  orphans = Attachment.where(:author_id => backup['user_id']).reject do |a|
-    a.container_type.blank? ||
-      (a.container_type.safe_constantize&.exists?(a.container_id) rescue false)
+  orphans = Attachment.where(:author_id => backup['user_id']).select do |a|
+    # attach! saves the row before assigning its container, so an interrupted
+    # seed leaves attachments with no container at all - those are orphans too.
+    next true if a.container_type.blank?
+
+    klass = a.container_type.safe_constantize
+    # An unknown container class means nothing can own this row any more.
+    next true if klass.nil?
+
+    # No blanket rescue here: a transient database error must not read as
+    # "container missing" and take a live attachment with it. Let it raise.
+    !klass.exists?(a.container_id)
   end
   if orphans.any?
     say "removing #{orphans.size} orphaned attachment(s)"
