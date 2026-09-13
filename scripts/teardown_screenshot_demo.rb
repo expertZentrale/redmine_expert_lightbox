@@ -38,8 +38,17 @@ projects.destroy_all
 # an attachment whose container row is gone leaves the file on disk. Sweep any
 # the capture user authored whose container no longer exists - authored-by keeps
 # this from ever reaching an attachment the demo did not create.
-if backup['user_id']
-  orphans = Attachment.where(:author_id => backup['user_id']).select do |a|
+# The same identity check the user delete makes, applied before the sweep rather
+# than after it: if someone renamed the recorded account while the backup row
+# stayed behind, this must not go looking through a real user's attachments.
+capture_user = backup['user_id'] ? User.find_by(:id => backup['user_id']) : nil
+if capture_user && capture_user.login != LOGIN
+  say "user ##{capture_user.id} is now '#{capture_user.login}', not '#{LOGIN}' - leaving it and its attachments alone"
+  capture_user = nil
+end
+
+if capture_user
+  orphans = Attachment.where(:author_id => capture_user.id).select do |a|
     # attach! saves the row before assigning its container, so an interrupted
     # seed leaves attachments with no container at all - those are orphans too.
     next true if a.container_type.blank?
@@ -58,17 +67,12 @@ if backup['user_id']
   end
 end
 
-if backup['user_id']
-  user = User.find_by(:id => backup['user_id'])
-  if user.nil?
-    say 'capture user already gone'
-  elsif user.login != LOGIN
-    say "user ##{user.id} is now '#{user.login}', not '#{LOGIN}' - leaving it alone"
-  else
-    Token.where(:user_id => user.id).delete_all
-    user.destroy
-    say 'removed the capture user'
-  end
+if capture_user
+  Token.where(:user_id => capture_user.id).delete_all
+  capture_user.destroy
+  say 'removed the capture user'
+elsif backup['user_id']
+  say 'capture user already gone or not ours'
 end
 
 Setting.where(:name => BACKUP_KEY).delete_all
