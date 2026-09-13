@@ -4,7 +4,7 @@
 #
 # The plugin has no pages of its own — it is a click handler that opens
 # attachments in a dialog — so what a screenshot needs is somewhere with
-# attachments worth clicking: an issue carrying images and a PDF, a wiki page
+# attachments worth :clicking => an issue carrying images and a PDF, a wiki page
 # with an inline image, and a Files entry.
 #
 # Run it against the parent repo's docker-compose.screenshots.yml, not the dev
@@ -17,7 +17,7 @@
 # `expert_lightbox_screenshot_backup`, and scripts/teardown_screenshot_demo.rb
 # removes exactly those rows.
 #
-# The attachments come from scripts/demo-assets/ and are all synthetic: an
+# The attachments come from scripts/demo-assets/ and are all :synthetic => an
 # invented error dialog, an invented type plate, an invented topology and an
 # invented inspection report.
 #
@@ -71,7 +71,7 @@ password = ENV['DEMO_PASSWORD'].presence || SecureRandom.alphanumeric(20)
 # would mean elevating a real user to admin, resetting their password, and then
 # deleting them on teardown.
 previous_user_id = previous ? JSON.parse(previous)['user_id'] : nil
-existing = User.find_by(login: LOGIN)
+existing = User.find_by(:login => LOGIN)
 
 if existing && existing.id != previous_user_id
   abort "[seed] A user '#{LOGIN}' already exists and was not created by this script. " \
@@ -79,8 +79,8 @@ if existing && existing.id != previous_user_id
         "reset, and be deleted on teardown."
 end
 
-user = existing || User.new(login: LOGIN, firstname: 'Martin', lastname: 'Keller',
-                            mail: 'martin.keller@example.com')
+user = existing || User.new(:login => LOGIN, :firstname => 'Martin', :lastname => 'Keller',
+                            :mail => 'martin.keller@example.com')
 user.admin    = true
 user.language = 'en'
 user.password = password
@@ -92,24 +92,24 @@ say "capture user #{LOGIN} / #{password}"
 # --- wipe a previous run ------------------------------------------------------
 
 if previous
-  Project.where(id: Array(JSON.parse(previous)['project_ids'])).destroy_all
+  Project.where(:id => Array(JSON.parse(previous)['project_ids'])).destroy_all
   say 'removed the previous demo project'
 end
 
 # --- project ------------------------------------------------------------------
 
 project = Project.create!(
-  name: 'Field Service',
-  identifier: IDENT,
-  description: 'Repairs and on-site work. Demo project for the attachment preview.',
-  is_public: false
+  :name => 'Field Service',
+  :identifier => IDENT,
+  :description => 'Repairs and on-site work. Demo project for the attachment preview.',
+  :is_public => false
 )
 project.enabled_module_names = %w[issue_tracking wiki documents files]
 project.trackers = Tracker.all.to_a
 project.save!
 
-Member.create!(project: project, principal: user,
-               roles: [Role.givable.first].compact) if Role.givable.any?
+Member.create!(:project => project, :principal => user,
+               :roles => [Role.givable.first].compact) if Role.givable.any?
 say "created project #{IDENT}"
 
 # --- attachments --------------------------------------------------------------
@@ -117,7 +117,7 @@ say "created project #{IDENT}"
 # Attachment#file= writes the file into Attachment.storage_path, which is why
 # this has to run with the files volume mounted.
 def attach!(path, author, description)
-  Attachment.new(author: author, description: description).tap do |a|
+  Attachment.new(:author => author, :description => description).tap do |a|
     a.file = File.open(path, 'rb')
     a.filename = File.basename(path)
     a.save!
@@ -132,13 +132,13 @@ ASSET_DESCRIPTIONS = {
 }.freeze
 
 tracker  = Tracker.first
-status   = IssueStatus.where(is_closed: false).order(:position).first
+status   = IssueStatus.where(:is_closed => false).order(:position).first
 priority = IssuePriority.default || IssuePriority.first
 
-issue = Issue.new(project: project, tracker: tracker, author: user,
-                  assigned_to: user, status: status, priority: priority,
-                  subject: 'Till in branch 042 loses its connection every morning',
-                  description: <<~TEXT)
+issue = Issue.new(:project => project, :tracker => tracker, :author => user,
+                  :assigned_to => user, :status => status, :priority => priority,
+                  :subject => 'Till in branch 042 loses its connection every morning',
+                  :description => <<~TEXT)
     The till in branch 042 drops its connection to the warehouse server shortly
     after opening. Screenshot of the message, the type plate and the topology
     are attached, along with the inspection report from the last visit.
@@ -149,19 +149,19 @@ ASSET_DESCRIPTIONS.each do |filename, description|
   path = File.join(ASSETS, filename)
   next say("missing asset #{filename}") unless File.exist?(path)
   attachment = attach!(path, user, description)
-  attachment.update_columns(container_type: 'Issue', container_id: issue.id)
+  attachment.update_columns(:container_type => 'Issue', :container_id => issue.id)
 end
 say "created issue ##{issue.id} with #{issue.reload.attachments.count} attachments"
 
-# A plain journal note, no attachment of its own: a fifth attachment would make
+# A plain journal note, no attachment of its :own => a fifth attachment would make
 # the gallery read "1 / 5" and contradict the counter in the screenshots.
 journal = issue.init_journal(user, 'Replacement power supply fitted — the message is unchanged.')
 journal.save!
 
 # --- wiki, documents, files ---------------------------------------------------
 
-wiki = project.wiki || Wiki.create!(project: project, start_page: 'Wiki')
-page = WikiPage.new(wiki: wiki, title: 'Branch 042')
+wiki = project.wiki || Wiki.create!(:project => project, :start_page => 'Wiki')
+page = WikiPage.new(:wiki => wiki, :title => 'Branch 042')
 
 # Image syntax follows the instance's own text formatting: Redmine 7 defaults to
 # common_mark, where Textile's !name.png! is literal text and the image silently
@@ -173,7 +173,7 @@ image_markup =
     '![Branch topology](03-network-diagram.png)'
   end
 
-page.build_content(text: <<~TEXT, author: user)
+page.build_content(:text => <<~TEXT, :author => user)
   # Branch 042
 
   Network layout of the branch, both the primary and the backup line:
@@ -184,18 +184,18 @@ page.build_content(text: <<~TEXT, author: user)
 TEXT
 page.save!
 wiki_image = attach!(File.join(ASSETS, '03-network-diagram.png'), user, 'Branch topology')
-wiki_image.update_columns(container_type: 'WikiPage', container_id: page.id)
+wiki_image.update_columns(:container_type => 'WikiPage', :container_id => page.id)
 say 'created wiki page with an inline image'
 
-document = Document.create!(project: project,
-                            category: DocumentCategory.first || Enumeration.first,
-                            title: 'Inspection reports 2026',
-                            description: 'Signed reports from on-site visits.')
+document = Document.create!(:project => project,
+                            :category => DocumentCategory.first || Enumeration.first,
+                            :title => 'Inspection reports 2026',
+                            :description => 'Signed reports from on-site visits.')
 doc_file = attach!(File.join(ASSETS, '04-inspection-report.pdf'), user, 'Visit 04.09.2026')
-doc_file.update_columns(container_type: 'Document', container_id: document.id)
+doc_file.update_columns(:container_type => 'Document', :container_id => document.id)
 
 project_file = attach!(File.join(ASSETS, '02-type-plate.jpg'), user, 'Terminal type plate')
-project_file.update_columns(container_type: 'Project', container_id: project.id)
+project_file.update_columns(:container_type => 'Project', :container_id => project.id)
 say 'created a document and a project file'
 
 write_raw_setting!(BACKUP_KEY,

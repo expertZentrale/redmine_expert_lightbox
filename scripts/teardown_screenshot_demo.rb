@@ -24,24 +24,39 @@ if raw.blank?
 end
 
 backup   = JSON.parse(raw)
-projects = Project.where(id: Array(backup['project_ids']))
+projects = Project.where(:id => Array(backup['project_ids']))
 
 say "removing #{projects.count} project(s), " \
-    "#{Issue.where(project_id: projects.select(:id)).count} issue(s) and " \
+    "#{Issue.where(:project_id => projects.select(:id)).count} issue(s) and " \
     "their attachments"
 projects.destroy_all
 
 # Only the account the seed itself created. The seed refuses to adopt a
 # pre-existing login precisely so that this delete can never reach a real user,
 # but check the login as well before destroying anything.
+# Destroying the project takes its issues, wiki, documents and files with it, but
+# an attachment whose container row is gone leaves the file on disk. Sweep any
+# the capture user authored whose container no longer exists - authored-by keeps
+# this from ever reaching an attachment the demo did not create.
 if backup['user_id']
-  user = User.find_by(id: backup['user_id'])
+  orphans = Attachment.where(:author_id => backup['user_id']).reject do |a|
+    a.container_type.blank? ||
+      (a.container_type.safe_constantize&.exists?(a.container_id) rescue false)
+  end
+  if orphans.any?
+    say "removing #{orphans.size} orphaned attachment(s)"
+    orphans.each(&:destroy)
+  end
+end
+
+if backup['user_id']
+  user = User.find_by(:id => backup['user_id'])
   if user.nil?
     say 'capture user already gone'
   elsif user.login != LOGIN
     say "user ##{user.id} is now '#{user.login}', not '#{LOGIN}' - leaving it alone"
   else
-    Token.where(user_id: user.id).delete_all
+    Token.where(:user_id => user.id).delete_all
     user.destroy
     say 'removed the capture user'
   end

@@ -4,6 +4,13 @@
 >
 > Maßgeblich ist die englische Fassung; diese Datei ist der deutsche Spiegel.
 
+## [Unreleased]
+
+### Behoben
+- **Das Teardown der Screenshots ließ verwaiste Anhänge zurück**, und die Demo-Skripte nutzten die
+  Ruby-Kurzschreibweise für Hashes entgegen dem Hausstil. Das Teardown entfernt jetzt Anhänge des
+  Capture-Benutzers, deren Container nicht mehr existiert, und beide Skripte verwenden Hash-Rockets.
+
 ## [1.1.1] 2026-09-13
 
 ### Behoben
