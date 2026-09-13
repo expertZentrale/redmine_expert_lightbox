@@ -55,14 +55,17 @@
 
   // Filename is needed for the type decision, and core's bare /attachments/<id> links
   // do not carry one. Try every place Redmine happens to put it, most reliable first.
-  function filenameFor(a, fromPath) {
-    var img = a.querySelector('img');
+  // `el` is an anchor or - for an inline wiki image - the <img> itself, which has no
+  // descendants to search and no text content.
+  function filenameFor(el, fromPath) {
+    var isImg = el.tagName === 'IMG';
+    var img = isImg ? el : el.querySelector('img');
     var candidates = [
       fromPath,
-      a.getAttribute('data-filename'),
+      el.getAttribute('data-filename'),
       img ? img.getAttribute('alt') : null,
-      a.getAttribute('title'),
-      (a.textContent || '').trim()
+      el.getAttribute('title'),
+      isImg ? null : (el.textContent || '').trim()
     ];
     for (var i = 0; i < candidates.length; i++) {
       var c = candidates[i];
@@ -71,26 +74,38 @@
     return null;
   }
 
-  // Returns {id, name, type} for a previewable anchor, or null to leave the click alone.
-  function describe(a) {
-    var href = a.getAttribute('href');
-    if (!href || a.hasAttribute('download') || a.hasAttribute('data-no-lightbox')) { return null; }
+  /*
+   * Returns {id, name, type} for a previewable element, or null to leave the click
+   * alone. `el` is an anchor, or a bare <img> whose src is an attachment URL.
+   *
+   * The <img> case is what covers inline wiki images. Redmine renders `!name.png!`
+   * (and CommonMark's `![](name.png)`) as an <img> inside a <p> with no wrapping
+   * link at all - in both text formats - so an anchor-only listener never sees them.
+   */
+  function describe(el) {
+    var isImg = el.tagName === 'IMG';
+    var raw = isImg ? el.getAttribute('src') : el.getAttribute('href');
+    if (!raw || el.hasAttribute('data-no-lightbox')) { return null; }
+    // `download` means the author wants the file saved, not previewed. Anchors only:
+    // it is a valid, unrelated attribute name on nothing else here.
+    if (!isImg && el.hasAttribute('download')) { return null; }
 
     var u;
-    try { u = new URL(a.href, window.location.href); } catch (e) { return null; }
+    try { u = new URL(isImg ? el.src : el.href, window.location.href); } catch (e) { return null; }
     if (u.origin !== window.location.origin) { return null; }
 
     var parsed = parseAttachmentPath(u.pathname);
     if (!parsed) { return null; }
 
-    var name = filenameFor(a, parsed.name);
+    var name = filenameFor(el, parsed.name);
     var type = null;
     if (name && PDF_EXT.test(name)) {
       type = 'pdf';
     } else if (name && IMAGE_EXT.test(name)) {
       type = 'image';
-    } else if (!name && a.querySelector('img')) {
-      // No filename anywhere, but the link renders an image - safe to show as one.
+    } else if (!name && (isImg || el.querySelector('img'))) {
+      // No filename anywhere, but it renders an image - safe to show as one. Covers
+      // the thumbnail route, whose trailing segment is a pixel size, not a name.
       type = 'image';
     }
     if (!type) { return null; }
@@ -103,9 +118,12 @@
   function collect() {
     var seen = {};
     var out = [];
-    var links = document.querySelectorAll('a[href*="/attachments/"]');
-    for (var i = 0; i < links.length; i++) {
-      var d = describe(links[i]);
+    // Anchors and bare inline images alike. An <img> inside an anchor is described
+    // twice, but querySelectorAll returns document order, so the anchor comes first
+    // and the dedupe by id keeps that one.
+    var nodes = document.querySelectorAll('a[href*="/attachments/"], img[src*="/attachments/"]');
+    for (var i = 0; i < nodes.length; i++) {
+      var d = describe(nodes[i]);
       if (d && !seen[d.id]) { seen[d.id] = true; out.push(d); }
     }
     return out;
@@ -284,16 +302,21 @@
     if (e.defaultPrevented || e.button !== 0) { return; }
     if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) { return; }
 
-    var a = e.target.closest ? e.target.closest('a[href]') : null;
-    if (!a || a.target === '_blank') { return; }
+    if (!e.target.closest) { return; }
 
-    var target = describe(a);
+    var a = e.target.closest('a[href]');
+    if (a && a.target === '_blank') { return; }
+    // No anchor: an inline wiki image is an <img> in a <p>, clicked directly.
+    var el = a || (e.target.tagName === 'IMG' ? e.target : null);
+    if (!el) { return; }
+
+    var target = describe(el);
     if (!target) { return; }
 
     // No <dialog> support (pre-2022 browsers): fall through to normal navigation.
     if (typeof HTMLDialogElement === 'undefined' || !HTMLDialogElement.prototype.showModal) { return; }
 
     e.preventDefault();
-    open(target, a);
+    open(target, el);
   }, false);
 }());

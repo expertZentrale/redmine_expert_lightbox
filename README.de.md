@@ -12,6 +12,42 @@ Redmine 6/7 nicht mehr funktionierte: es überschrieb die Core-View
 `app/views/attachments/_links.html.erb` und setzte auf die `icon-*`-Icon-Font-Klassen,
 die in Redmine 7 entfernt wurden.
 
+
+## Screenshots
+
+Alle Screenshots zeigen ein Demoprojekt mit synthetischen Daten, erzeugt von
+`scripts/seed_screenshot_demo.rb`.
+
+### Bilder und PDFs
+
+![Ein Bildanhang im Dialog über der Ticketseite, mit dem Zähler „1 / 4“ und den
+Schaltflächen für Zurück und Weiter in der Kopfzeile](docs/screenshots/de/01-image-modal.png)
+
+Ein PDF öffnet sich im eingebauten Betrachter des Browsers, samt Werkzeugleiste und
+Seitenvorschau. Die Klickflächen am Rand entfallen dort, damit sie dem Betrachter keine
+Klicks wegnehmen.
+
+![Ein PDF im eingebauten Betrachter des Browsers innerhalb des Dialogs, mit Werkzeugleiste
+und Seitenvorschau](docs/screenshots/de/03-pdf.png)
+
+### Galerie
+
+Alle anzeigbaren Anhänge einer Seite bilden in Dokumentreihenfolge eine Galerie. Die
+Klickflächen sind unsichtbar, bis man mit der Maus darüberfährt, und bleiben auf
+Touchgeräten, die kein Hover kennen, dauerhaft sichtbar.
+
+![Der dritte von vier Anhängen, mit der rechten Klickfläche, die beim Überfahren
+erscheint](docs/screenshots/de/02-gallery.png)
+
+### Überall, wo Anhänge vorkommen
+
+Die Erkennung greift allein an der Form der Anhang-URLs an, es gibt also keine Liste
+erlaubter Controller zu pflegen — eingebettete Wiki-Bilder eingeschlossen, die ein reines
+`<img>` ohne umschließenden Link sind.
+
+![Ein eingebettetes Wiki-Bild, geöffnet ohne die Seite zu verlassen, die es
+illustriert](docs/screenshots/de/04-wiki.png)
+
 ## Funktion
 
 Ein Klick auf einen Bild- oder PDF-Anhang öffnet ihn im Modal:

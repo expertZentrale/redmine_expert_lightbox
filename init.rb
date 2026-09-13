@@ -13,7 +13,7 @@ Redmine::Plugin.register :redmine_expert_lightbox do
   name 'Redmine expert Lightbox'
   author 'Dennis Buehring'
   description 'Preview image and PDF attachments in a modal dialog. No jQuery, no third-party libraries, works on Redmine 5.1 - 7.x.'
-  version '1.1.0'
+  version '1.1.1'
   url 'https://github.com/expertZentrale/redmine_expert_lightbox'
   requires_redmine :version_or_higher => '5.0'
 end

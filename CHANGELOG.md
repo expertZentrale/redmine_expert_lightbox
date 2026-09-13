@@ -4,6 +4,16 @@
 >
 > EN is authoritative — release notes are generated from this file.
 
+## [1.1.1] 2026-09-13
+
+### Fixed
+- **Inline wiki images open the lightbox.** Redmine renders `!image.png!` (and CommonMark's
+  `![](image.png)`) as a bare `<img>` inside a paragraph with no wrapping link — in both text
+  formats — and the click listener only ever looked at `a[href]`. Clicking an inline image
+  therefore did nothing, although the README and the code comments both listed inline wiki
+  images as covered. Detection now also accepts an `<img>` whose `src` is an attachment URL,
+  and such images join the page's gallery like any other attachment.
+
 ## [1.1.0] 2026-09-11
 
 ### Added
