@@ -4,6 +4,13 @@
 >
 > EN is authoritative — release notes are generated from this file.
 
+## [Unreleased]
+
+### Fixed
+- **The screenshot teardown left orphaned attachments behind** and the demo scripts used Ruby hash
+  shorthand against the house style. Teardown now sweeps attachments authored by the capture user
+  whose container row no longer exists, and both scripts use hash rockets.
+
 ## [1.1.1] 2026-09-13
 
 ### Fixed
