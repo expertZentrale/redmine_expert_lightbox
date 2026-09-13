@@ -63,11 +63,24 @@ end
 
 # --- capture user -------------------------------------------------------------
 
+previous = raw_setting(BACKUP_KEY).presence
+
 password = ENV['DEMO_PASSWORD'].presence || SecureRandom.alphanumeric(20)
 
-user = User.find_by(login: LOGIN) ||
-       User.new(login: LOGIN, firstname: 'Martin', lastname: 'Keller',
-                mail: 'martin.keller@example.com')
+# Only ever touch an account this script created. Taking over an existing login
+# would mean elevating a real user to admin, resetting their password, and then
+# deleting them on teardown.
+previous_user_id = previous ? JSON.parse(previous)['user_id'] : nil
+existing = User.find_by(login: LOGIN)
+
+if existing && existing.id != previous_user_id
+  abort "[seed] A user '#{LOGIN}' already exists and was not created by this script. " \
+        "Refusing to take it over - it would be made an admin, have its password " \
+        "reset, and be deleted on teardown."
+end
+
+user = existing || User.new(login: LOGIN, firstname: 'Martin', lastname: 'Keller',
+                            mail: 'martin.keller@example.com')
 user.admin    = true
 user.language = 'en'
 user.password = password
@@ -78,10 +91,8 @@ say "capture user #{LOGIN} / #{password}"
 
 # --- wipe a previous run ------------------------------------------------------
 
-previous = raw_setting(BACKUP_KEY).presence
 if previous
-  old = JSON.parse(previous)
-  Project.where(id: Array(old['project_ids'])).destroy_all
+  Project.where(id: Array(JSON.parse(previous)['project_ids'])).destroy_all
   say 'removed the previous demo project'
 end
 
@@ -142,12 +153,10 @@ ASSET_DESCRIPTIONS.each do |filename, description|
 end
 say "created issue ##{issue.id} with #{issue.reload.attachments.count} attachments"
 
-# A journal with its own image, so the gallery has a thumbnail outside the
-# attachments list to collect as well.
-journal = issue.init_journal(user, 'Same picture after the replacement power supply — unchanged.')
+# A plain journal note, no attachment of its own: a fifth attachment would make
+# the gallery read "1 / 5" and contradict the counter in the screenshots.
+journal = issue.init_journal(user, 'Replacement power supply fitted — the message is unchanged.')
 journal.save!
-extra = attach!(File.join(ASSETS, '01-error-dialog.png'), user, 'After the replacement')
-extra.update_columns(container_type: 'Journal', container_id: journal.id)
 
 # --- wiki, documents, files ---------------------------------------------------
 

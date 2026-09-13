@@ -89,6 +89,18 @@
     // `download` means the author wants the file saved, not previewed. Anchors only:
     // it is a valid, unrelated attribute name on nothing else here.
     if (!isImg && el.hasAttribute('download')) { return null; }
+    // An opt-out on the anchor has to cover the image inside it, or collect()
+    // would pick the <img> up on its own and put an explicitly excluded
+    // attachment back into the gallery.
+    if (isImg) {
+      var wrapper = el.closest ? el.closest('a[href]') : null;
+      if (wrapper && (wrapper.hasAttribute('download') || wrapper.hasAttribute('data-no-lightbox'))) {
+        return null;
+      }
+      // The dialog renders the current item as an <img> with the same URL shape.
+      // Collecting or re-opening it would fight with the dialog itself.
+      if (dlg && dlg.contains(el)) { return null; }
+    }
 
     var u;
     try { u = new URL(isImg ? el.src : el.href, window.location.href); } catch (e) { return null; }
@@ -297,20 +309,76 @@
     dlg.showModal();
   }
 
+  /*
+   * A bare inline <img> is mouse-clickable but nothing else: it cannot be tabbed
+   * to and has no activation behaviour, so the feature would be unreachable by
+   * keyboard and `opener.focus()` would silently do nothing on close.
+   *
+   * Marking it focusable is the least invasive fix available from a plugin that
+   * refuses to override core's views. The image keeps its `img` role - swapping
+   * in role="button" would cost screen-reader users the fact that it IS an
+   * image - and gains aria-haspopup="dialog", which is what actually happens.
+   */
+  function enhanceImages(root) {
+    var imgs = (root || document).querySelectorAll('img[src*="/attachments/"]');
+    for (var i = 0; i < imgs.length; i++) {
+      var img = imgs[i];
+      if (img.hasAttribute('data-elb-key')) { continue; }
+      if (img.closest && img.closest('a[href]')) { continue; }   // already focusable
+      if (dlg && dlg.contains(img)) { continue; }
+      if (!describe(img)) { continue; }
+      img.setAttribute('data-elb-key', '1');
+      img.setAttribute('tabindex', '0');
+      img.setAttribute('aria-haspopup', 'dialog');
+      if (!img.getAttribute('title')) { img.setAttribute('title', cfg.labels.dialog); }
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { enhanceImages(); });
+  } else {
+    enhanceImages();
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') { return; }
+    var el = e.target;
+    if (!el || el.tagName !== 'IMG' || !el.hasAttribute('data-elb-key')) { return; }
+    if (dlg && dlg.contains(el)) { return; }
+    var target = describe(el);
+    if (!target) { return; }
+    if (typeof HTMLDialogElement === 'undefined' || !HTMLDialogElement.prototype.showModal) { return; }
+    e.preventDefault();
+    open(target, el);
+  }, false);
+
   document.addEventListener('click', function (e) {
     // Leave modified clicks to the browser: they mean "new tab/window/save as".
     if (e.defaultPrevented || e.button !== 0) { return; }
     if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) { return; }
 
     if (!e.target.closest) { return; }
+    // Clicks inside the open dialog belong to the dialog: its own <img> matches
+    // the attachment URL shape, and re-entering open() would call showModal() on
+    // an already-open dialog.
+    if (dlg && dlg.contains(e.target)) { return; }
 
     var a = e.target.closest('a[href]');
     if (a && a.target === '_blank') { return; }
-    // No anchor: an inline wiki image is an <img> in a <p>, clicked directly.
-    var el = a || (e.target.tagName === 'IMG' ? e.target : null);
-    if (!el) { return; }
 
-    var target = describe(el);
+    // Prefer the anchor, but fall back to the image when the anchor is not an
+    // attachment link of ours - an attachment image wrapped in some unrelated
+    // link would otherwise never be previewable.
+    var el = null;
+    var target = null;
+    if (a) {
+      target = describe(a);
+      if (target) { el = a; }
+    }
+    if (!target && e.target.tagName === 'IMG') {
+      target = describe(e.target);
+      if (target) { el = e.target; }
+    }
     if (!target) { return; }
 
     // No <dialog> support (pre-2022 browsers): fall through to normal navigation.

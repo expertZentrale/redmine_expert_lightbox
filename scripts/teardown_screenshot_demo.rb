@@ -12,6 +12,7 @@
 require 'json'
 
 BACKUP_KEY = 'expert_lightbox_screenshot_backup'.freeze
+LOGIN      = 'm.keller'.freeze
 
 def say(msg)
   puts("[teardown] #{msg}")
@@ -30,9 +31,16 @@ say "removing #{projects.count} project(s), " \
     "their attachments"
 projects.destroy_all
 
+# Only the account the seed itself created. The seed refuses to adopt a
+# pre-existing login precisely so that this delete can never reach a real user,
+# but check the login as well before destroying anything.
 if backup['user_id']
   user = User.find_by(id: backup['user_id'])
-  if user
+  if user.nil?
+    say 'capture user already gone'
+  elsif user.login != LOGIN
+    say "user ##{user.id} is now '#{user.login}', not '#{LOGIN}' - leaving it alone"
+  else
     Token.where(user_id: user.id).delete_all
     user.destroy
     say 'removed the capture user'
