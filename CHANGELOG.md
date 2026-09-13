@@ -4,6 +4,25 @@
 >
 > EN is authoritative — release notes are generated from this file.
 
+## [1.1.1] 2026-09-13
+
+### Fixed
+- **Inline wiki images open the lightbox.** Redmine renders `!image.png!` (and CommonMark's
+  `![](image.png)`) as a bare `<img>` inside a paragraph with no wrapping link — in both text
+  formats — and the click listener only ever looked at `a[href]`. Clicking an inline image
+  therefore did nothing, although the README and the code comments both listed inline wiki
+  images as covered. Detection now also accepts an `<img>` whose `src` is an attachment URL,
+  and such images join the page's gallery like any other attachment.
+- **Inline wiki images are reachable by keyboard.** They are bare `<img>` elements, so they
+  had no way to be focused or activated; the plugin now marks the ones it will handle
+  `tabindex="0"` with `aria-haspopup="dialog"`, and `Enter` or `Space` opens them. Focus
+  still returns to the image on close.
+- An opt-out on a link (`download`, `data-no-lightbox`) now also covers the image inside it,
+  which the gallery would otherwise have picked up on its own.
+- An attachment image wrapped in an unrelated link is previewable again: the click handler
+  falls back to the image when the surrounding anchor is not an attachment link.
+- Clicking the picture inside the open dialog no longer tries to re-open the dialog.
+
 ## [1.1.0] 2026-09-11
 
 ### Added

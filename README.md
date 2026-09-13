@@ -12,6 +12,40 @@ stopped working on Redmine 6/7 because it overrode core's
 `app/views/attachments/_links.html.erb` and relied on the `icon-*` font-icon classes
 that Redmine 7 removed.
 
+
+## Screenshots
+
+All screenshots show a demo project with synthetic data, built by
+`scripts/seed_screenshot_demo.rb`.
+
+### Images and PDFs
+
+![An image attachment open in the dialog over the ticket page, with the counter showing one
+of four and the previous/next controls in the bar](docs/screenshots/en/01-image-modal.png)
+
+A PDF opens in the browser's own viewer, toolbar and page thumbnails included. The edge
+click zones are suppressed there so they cannot swallow the viewer's own clicks.
+
+![A PDF in the browser's own viewer inside the dialog, with its toolbar and page
+thumbnails](docs/screenshots/en/03-pdf.png)
+
+### Gallery
+
+Every previewable attachment on the page forms a gallery in document order. The edge zones
+are invisible until hovered, and stay visible on touch devices, which have no hover.
+
+![The third of four attachments, with the right-hand edge zone revealed on
+hover](docs/screenshots/en/02-gallery.png)
+
+### Anywhere attachments appear
+
+Detection keys only on the shape of attachment URLs, so there is no per-controller
+allowlist to keep up to date — including inline wiki images, which are a bare `<img>` with
+no wrapping link.
+
+![An inline wiki image, opened without leaving the page it
+illustrates](docs/screenshots/en/04-wiki.png)
+
 ## What it does
 
 Clicking an image or PDF attachment anywhere in Redmine opens it in a modal:

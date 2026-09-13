@@ -4,6 +4,26 @@
 >
 > Maßgeblich ist die englische Fassung; diese Datei ist der deutsche Spiegel.
 
+## [1.1.1] 2026-09-13
+
+### Behoben
+- **Eingebettete Wiki-Bilder öffnen die Lightbox.** Redmine stellt `!bild.png!` (und
+  CommonMark `![](bild.png)`) als reines `<img>` in einem Absatz dar, ohne umschließenden
+  Link — in beiden Textformaten —, und die Klickerkennung sah ausschließlich auf `a[href]`.
+  Ein Klick auf ein eingebettetes Bild bewirkte deshalb nichts, obwohl README und
+  Quellkommentare eingebettete Wiki-Bilder als abgedeckt aufführten. Die Erkennung
+  akzeptiert jetzt auch ein `<img>`, dessen `src` eine Anhang-URL ist; solche Bilder gehören
+  damit wie jeder andere Anhang zur Galerie der Seite.
+- **Eingebettete Wiki-Bilder sind per Tastatur erreichbar.** Als reine `<img>`-Elemente
+  konnten sie weder fokussiert noch ausgelöst werden; das Plugin markiert die von ihm
+  behandelten Bilder jetzt mit `tabindex="0"` und `aria-haspopup="dialog"`, `Enter` oder
+  `Leertaste` öffnen sie. Der Fokus kehrt beim Schließen weiterhin zum Bild zurück.
+- Ein Opt-out am Link (`download`, `data-no-lightbox`) gilt jetzt auch für das Bild darin,
+  das die Galerie sonst eigenständig aufgesammelt hätte.
+- Ein Anhangsbild in einem fremden Link ist wieder anzeigbar: Die Klickerkennung fällt auf
+  das Bild zurück, wenn der umgebende Link kein Anhang-Link ist.
+- Ein Klick auf das Bild im geöffneten Dialog versucht nicht mehr, den Dialog erneut zu öffnen.
+
 ## [1.1.0] 2026-09-11
 
 ### Hinzugefügt
