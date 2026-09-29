@@ -79,7 +79,7 @@ full-size image in the lightbox, and the cursor shows a zoom-in hint.
   values instead; blank fields there mean no limit for that project. Subprojects do not
   inherit the override.
 
-The limit applies to attachment images inside rich text (`div.wiki`) only. External
+The limit applies to this Redmine's own attachment images inside rich text (`div.wiki`) only. Values are capped at 10000 px. External
 images are left alone because they cannot be opened in the lightbox. Images keep their
 aspect ratio — an explicit size in the markup (e.g. `!{width:800px}image.png!`) is
 scaled down to fit the limit as well.

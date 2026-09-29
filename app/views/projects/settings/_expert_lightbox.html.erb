@@ -14,12 +14,12 @@
     <p>
       <label for="expert_lightbox_project_setting_inline_max_width"><%= l(:label_expert_lightbox_inline_max_width) %></label>
       <%= number_field_tag 'expert_lightbox_project_setting[inline_max_width]', setting.inline_max_width,
-                           :min => 1, :step => 1, :size => 6, :id => 'expert_lightbox_project_setting_inline_max_width' %> px
+                           :min => 1, :max => ExpertLightboxProjectSetting::MAX_PX, :step => 1, :size => 6, :id => 'expert_lightbox_project_setting_inline_max_width' %> px
     </p>
     <p>
       <label for="expert_lightbox_project_setting_inline_max_height"><%= l(:label_expert_lightbox_inline_max_height) %></label>
       <%= number_field_tag 'expert_lightbox_project_setting[inline_max_height]', setting.inline_max_height,
-                           :min => 1, :step => 1, :size => 6, :id => 'expert_lightbox_project_setting_inline_max_height' %> px
+                           :min => 1, :max => ExpertLightboxProjectSetting::MAX_PX, :step => 1, :size => 6, :id => 'expert_lightbox_project_setting_inline_max_height' %> px
       <em class="info"><%= l(:text_expert_lightbox_inline_size) %></em>
     </p>
     <p>

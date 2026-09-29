@@ -8,8 +8,13 @@ class ExpertLightboxProjectSetting < (defined?(ApplicationRecord) ? ApplicationR
   belongs_to :project
 
   validates :project_id, :presence => true, :uniqueness => true
+  # Upper bound keeps absurd input a validation error instead of an integer
+  # overflow on the 4-byte column (which would surface as a 500).
+  MAX_PX = 10_000
+
   validates :inline_max_width, :inline_max_height,
-            :numericality => { :only_integer => true, :greater_than => 0 },
+            :numericality => { :only_integer => true, :greater_than => 0,
+                               :less_than_or_equal_to => MAX_PX },
             :allow_nil => true
 
   # Blank form fields mean "no limit", stored as NULL rather than 0.
@@ -49,6 +54,6 @@ class ExpertLightboxProjectSetting < (defined?(ApplicationRecord) ? ApplicationR
     value = value.to_s.strip
     return nil unless value.match?(/\A\d+\z/)
 
-    value.to_i.positive? ? value.to_i : nil
+    value.to_i.positive? ? [value.to_i, MAX_PX].min : nil
   end
 end

@@ -82,7 +82,7 @@ Bild weiterhin in voller Größe in der Lightbox, der Mauszeiger zeigt dazu eine
   des Projekts; leere Felder bedeuten dort keine Begrenzung für dieses Projekt.
   Unterprojekte erben die Überschreibung nicht.
 
-Die Begrenzung gilt nur für Anhang-Bilder in formatiertem Text (`div.wiki`). Externe Bilder
+Die Begrenzung gilt nur für Anhang-Bilder dieses Redmine in formatiertem Text (`div.wiki`). Werte sind auf 10000 px begrenzt. Externe Bilder
 bleiben unverändert, weil sie sich nicht in der Lightbox öffnen lassen. Das Seitenverhältnis
 bleibt erhalten — auch eine im Markup gesetzte Größe (z. B. `!{width:800px}bild.png!`)
 wird auf die Begrenzung verkleinert.

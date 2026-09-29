@@ -20,6 +20,8 @@ class ExpertLightboxInlineSizeHookTest < Redmine::ControllerTest
     end
     assert_response :success
     assert_select 'style#expert-lightbox-inline-size', :text => /max-width:min\(100%,800px\);max-height:400px/
+    # Anchored to the app's own path, so external URLs containing /attachments/ are left alone.
+    assert_select 'style#expert-lightbox-inline-size', :text => %r{img\[src\^="/attachments/"\]}
   end
 
   def test_project_override_replaces_global_limits

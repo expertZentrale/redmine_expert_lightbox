@@ -32,6 +32,12 @@ class ExpertLightboxProjectSettingTest < ActiveSupport::TestCase
     end
   end
 
+  def test_oversized_global_values_are_capped
+    with_settings plugin_settings('99999999999', '20000') do
+      assert_equal({ :width => 10_000, :height => 10_000 }, ExpertLightboxProjectSetting.global_limits)
+    end
+  end
+
   def test_active_override_wins
     ExpertLightboxProjectSetting.create!(:project_id => 1, :override => true,
                                          :inline_max_width => '', :inline_max_height => '600')
@@ -50,7 +56,7 @@ class ExpertLightboxProjectSettingTest < ActiveSupport::TestCase
   end
 
   def test_rejects_non_positive_and_non_numeric_values
-    ['0', '-5', 'abc', '1.5'].each do |value|
+    ['0', '-5', 'abc', '1.5', '10001', '99999999999'].each do |value|
       setting = ExpertLightboxProjectSetting.new(:project_id => 1, :inline_max_height => value)
       assert_not setting.valid?, "#{value.inspect} should be invalid"
     end

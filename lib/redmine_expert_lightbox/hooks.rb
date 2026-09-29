@@ -51,7 +51,12 @@ module RedmineExpertLightbox
       # width/height auto keep the aspect ratio even when the markup sets an
       # explicit size; object-fit covers what auto cannot undo.
       rules << 'width:auto;height:auto;object-fit:contain;cursor:zoom-in'
-      content_tag(:style, "div.wiki img[src*=\"/attachments/\"]{#{rules.join(';')}}".html_safe,
+      # Prefix match on this app's own root-relative attachment path (which is how
+      # Redmine renders inline attachment images), so an external URL that merely
+      # contains /attachments/ - e.g. https://cdn.example/attachments/x.png - is not
+      # shrunk. relative_url_root is a deployment path; to_json quotes it for CSS.
+      prefix = "#{Redmine::Utils.relative_url_root}/attachments/".to_json
+      content_tag(:style, "div.wiki img[src^=#{prefix}]{#{rules.join(';')}}".html_safe,
                   :id => 'expert-lightbox-inline-size')
     end
   end
