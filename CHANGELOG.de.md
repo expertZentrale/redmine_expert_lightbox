@@ -6,6 +6,18 @@
 
 ## [Unreleased]
 
+## [1.2.0] 2026-09-29
+
+### Hinzugefügt
+- **Maximale Größe für eingebettete Bilder.** In Tickets, Kommentaren, Wiki-Seiten, News und
+  Foren eingebettete Screenshots wurden immer in voller Größe angezeigt, was lange Tickets
+  schwer lesbar machte. Eine neue Plugin-Einstellung begrenzt eingebettete Anhang-Bilder auf
+  eine maximale Breite und/oder Höhe (px, leer = keine Begrenzung, Standard); ein Klick öffnet
+  das Bild weiterhin in voller Größe in der Lightbox. Projekte können den globalen Wert im
+  neuen Reiter *Bildvorschau* der Projektkonfiguration überschreiben – verfügbar für alle, die
+  das Projekt bearbeiten dürfen. Externe Bilder sind nicht betroffen, da sie sich nicht in der
+  Lightbox öffnen lassen. Erfordert `rake redmine:plugins:migrate`.
+
 ### Behoben
 - **Das Teardown der Screenshots ließ verwaiste Anhänge zurück**, und die Demo-Skripte nutzten die
   Ruby-Kurzschreibweise für Hashes entgegen dem Hausstil. Das Teardown entfernt jetzt Anhänge des

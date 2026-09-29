@@ -6,6 +6,18 @@
 
 ## [Unreleased]
 
+## [1.2.0] 2026-09-29
+
+### Added
+- **Maximum size for inline images.** Screenshots embedded in issues, notes, wiki pages,
+  news and forums were always shown at full size, which made long tickets hard to read. A
+  new plugin setting caps inline attachment images at a maximum width and/or height (px,
+  blank = no limit, the default); a click still opens the full-size image in the lightbox.
+  Projects can override the global value in a new *Image preview* tab in the project
+  settings, available to anyone allowed to edit the project. External images are not
+  affected, because they cannot be opened in the lightbox. Requires
+  `rake redmine:plugins:migrate`.
+
 ### Fixed
 - **The screenshot teardown left orphaned attachments behind** and the demo scripts used Ruby hash
   shorthand against the house style. Teardown now sweeps attachments authored by the capture user

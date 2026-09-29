@@ -4,3 +4,7 @@
 # the browser's PDF viewer show a sensible title) - the :id decides what is served.
 get 'expert_lightbox/inline/:id(/*filename)', :to => 'expert_lightbox#inline',
     :as => 'expert_lightbox_inline', :format => false, :id => /\d+/
+
+# Per-project override of the inline image size limit (project settings tab).
+match 'projects/:project_id/expert_lightbox_settings', :to => 'expert_lightbox_project_settings#update',
+      :via => [:patch, :put, :post], :as => 'expert_lightbox_project_settings'

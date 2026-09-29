@@ -29,7 +29,30 @@ module RedmineExpertLightbox
       stylesheet_link_tag('expert_lightbox', :plugin => 'redmine_expert_lightbox') +
         content_tag(:script, config.to_json.html_safe,
                     :type => 'application/json', :id => 'expert-lightbox-config') +
-        javascript_include_tag('expert_lightbox', :plugin => 'redmine_expert_lightbox')
+        javascript_include_tag('expert_lightbox', :plugin => 'redmine_expert_lightbox') +
+        inline_size_style(context[:project])
+    end
+
+    private
+
+    # Caps inline attachment images in rich text (issue description, notes, wiki,
+    # news, forums) at the configured size; a click still opens the original in
+    # the lightbox. Only attachment images - external ones cannot be opened in the
+    # lightbox, so shrinking them would lose detail for good. The limits are
+    # integers from the resolver, so interpolating them into CSS is safe.
+    def inline_size_style(project)
+      limits = ExpertLightboxProjectSetting.limits_for(project)
+      return ''.html_safe unless limits[:width] || limits[:height]
+
+      rules = []
+      # min() keeps Redmine's own max-width:100% so narrow columns still win.
+      rules << "max-width:min(100%,#{limits[:width].to_i}px)" if limits[:width]
+      rules << "max-height:#{limits[:height].to_i}px" if limits[:height]
+      # width/height auto keep the aspect ratio even when the markup sets an
+      # explicit size; object-fit covers what auto cannot undo.
+      rules << 'width:auto;height:auto;object-fit:contain;cursor:zoom-in'
+      content_tag(:style, "div.wiki img[src*=\"/attachments/\"]{#{rules.join(';')}}".html_safe,
+                  :id => 'expert-lightbox-inline-size')
     end
   end
 end

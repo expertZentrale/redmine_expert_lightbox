@@ -1,0 +1,14 @@
+<%# Plugin settings (Administration -> Plugins -> Redmine expert Lightbox). Every key
+    rendered here is declared as a default in init.rb. %>
+<fieldset class="box tabular">
+  <legend><%= l(:label_expert_lightbox_inline_size) %></legend>
+  <p>
+    <label for="settings_inline_max_width"><%= l(:label_expert_lightbox_inline_max_width) %></label>
+    <%= number_field_tag 'settings[inline_max_width]', @settings['inline_max_width'], :min => 1, :step => 1, :size => 6 %> px
+  </p>
+  <p>
+    <label for="settings_inline_max_height"><%= l(:label_expert_lightbox_inline_max_height) %></label>
+    <%= number_field_tag 'settings[inline_max_height]', @settings['inline_max_height'], :min => 1, :step => 1, :size => 6 %> px
+    <em class="info"><%= l(:text_expert_lightbox_inline_size) %></em>
+  </p>
+</fieldset>

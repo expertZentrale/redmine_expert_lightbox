@@ -69,6 +69,24 @@ Inline-Wiki-Bilder (`!bild.png!`), die Module Dateien und Dokumente, News und
 Foren-Beiträge — dazu jede Seite eines Fremd-Plugins, die auf Anhänge verlinkt, denn es
 gibt keine Allowlist pro Controller.
 
+### Größe eingebetteter Bilder
+
+Große Screenshots in Tickets, Kommentaren und Wiki-Seiten lassen sich auf eine maximale
+Breite und/oder Höhe begrenzen, damit lange Tickets lesbar bleiben — ein Klick öffnet das
+Bild weiterhin in voller Größe in der Lightbox, der Mauszeiger zeigt dazu eine Lupe.
+
+- **Global:** *Administration → Plugins → Redmine expert Lightbox → Konfigurieren*. Beide
+  Felder in px; leer bedeutet keine Begrenzung (Standard, ein Update ändert also nichts).
+- **Pro Projekt:** Reiter *Bildvorschau* in der Projektkonfiguration (sichtbar für alle, die
+  das Projekt bearbeiten dürfen). Mit *Globale Einstellung überschreiben* gelten die Werte
+  des Projekts; leere Felder bedeuten dort keine Begrenzung für dieses Projekt.
+  Unterprojekte erben die Überschreibung nicht.
+
+Die Begrenzung gilt nur für Anhang-Bilder in formatiertem Text (`div.wiki`). Externe Bilder
+bleiben unverändert, weil sie sich nicht in der Lightbox öffnen lassen. Das Seitenverhältnis
+bleibt erhalten — auch eine im Markup gesetzte Größe (z. B. `!{width:800px}bild.png!`)
+wird auf die Begrenzung verkleinert.
+
 ## Umsetzung
 
 Drei kleine Bausteine, bewusst so gewählt, dass sie Redmine-Major-Upgrades überstehen:
@@ -107,11 +125,12 @@ Zugriff, den `/attachments/download` nicht auch gewähren würde.
 ```bash
 cd /pfad/zu/redmine/plugins
 git clone https://github.com/expertZentrale/redmine_expert_lightbox.git
+bundle exec rake redmine:plugins:migrate NAME=redmine_expert_lightbox RAILS_ENV=production
 # Redmine neu starten
 ```
 
-Keine Migrationen, keine Einstellungen, keine Berechtigungen — das Plugin ist aktiv,
-sobald es geladen ist.
+Keine Berechtigungen zu konfigurieren — die Lightbox ist aktiv, sobald das Plugin geladen
+ist. Die Migration legt nur die Tabelle für projektbezogene Bildgrößen an.
 
 ## Tests
 
