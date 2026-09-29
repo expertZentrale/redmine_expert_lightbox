@@ -66,6 +66,24 @@ thumbnails, inline wiki images (`!image.png!`), the Files and Documents modules,
 and forum messages — plus any third-party plugin page that links to attachments,
 because there is no per-controller allowlist.
 
+### Inline image size
+
+Large screenshots embedded in issues, notes and wiki pages can be capped at a maximum
+width and/or height, which keeps long tickets readable — a click still opens the
+full-size image in the lightbox, and the cursor shows a zoom-in hint.
+
+- **Global:** *Administration → Plugins → Redmine expert Lightbox → Configure*. Both
+  fields are in px; blank means no limit (the default, so nothing changes on upgrade).
+- **Per project:** the *Image preview* tab in the project settings (visible to anyone
+  allowed to edit the project). Tick *Override global setting* to use the project's own
+  values instead; blank fields there mean no limit for that project. Subprojects do not
+  inherit the override.
+
+The limit applies to this Redmine's own attachment images inside rich text (`div.wiki`) only. Values are capped at 10000 px. External
+images are left alone because they cannot be opened in the lightbox. Images keep their
+aspect ratio — an explicit size in the markup (e.g. `!{width:800px}image.png!`) is
+scaled down to fit the limit as well.
+
 ## How it works
 
 Three small pieces, deliberately chosen to survive Redmine major upgrades:
@@ -86,6 +104,12 @@ Three small pieces, deliberately chosen to survive Redmine major upgrades:
 There is **no view override and no patch to `AttachmentsController`**, which is what
 broke the previous plugin and what would collide with `redmine_contacts` here.
 
+The inline image size limit is a `<style>` rule emitted by the same layout hook that
+loads the script, resolved per page from the global setting or the project's override
+(`expert_lightbox_project_settings` table). The project settings tab is added to
+`ProjectsHelper#project_settings_tabs` via a captured `UnboundMethod`, so it chains
+safely with the RedmineUP plugins that wrap the same method.
+
 ### Security
 
 `ExpertLightboxController#inline` serves a file inline only if its extension is in a
@@ -101,10 +125,12 @@ endpoint grants no access that `/attachments/download` would not.
 ```bash
 cd /path/to/redmine/plugins
 git clone https://github.com/expertZentrale/redmine_expert_lightbox.git
+bundle exec rake redmine:plugins:migrate NAME=redmine_expert_lightbox RAILS_ENV=production
 # restart Redmine
 ```
 
-No migrations, no settings, no permissions — the plugin is active as soon as it loads.
+No permissions to configure — the lightbox is active as soon as the plugin loads. The
+migration only creates the table for per-project image size overrides.
 
 ## Tests
 

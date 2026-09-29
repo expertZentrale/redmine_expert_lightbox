@@ -121,14 +121,14 @@ jobs:
           bundle config set --local without 'development'
           bundle install --jobs 4 --retry 3
 
-      # 8. Build a clean environment: secret token and core migrations. This
-      #    plugin ships no migrations of its own, so there is no
-      #    `redmine:plugins:migrate` step - it adds no tables and no settings.
+      # 8. Build a clean environment: secret token, core migrations and the
+      #    plugin's own migrations (the per-project image size table).
       - name: Prepare Redmine
         working-directory: ${{ env.REDMINE_DIR }}
         run: |
           bundle exec rake generate_secret_token
           bundle exec rake db:create db:migrate
+          bundle exec rake redmine:plugins:migrate NAME=redmine_expert_lightbox
 
       # 9. Run the plugin tests (unit + functional).
       - name: Run plugin tests

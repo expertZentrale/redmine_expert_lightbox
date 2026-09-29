@@ -9,7 +9,7 @@ body:
       options:
         - label: I am running the latest release of the plugin
           required: true
-        - label: Redmine was restarted after installing the plugin (it ships no migrations, so there is nothing to migrate)
+        - label: "`rake redmine:plugins:migrate` was run and Redmine was restarted after installing or updating the plugin"
           required: true
         - label: No other lightbox plugin is installed alongside it
           required: true
