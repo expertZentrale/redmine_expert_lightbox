@@ -94,9 +94,8 @@ jobs:
           done
           [ "$code" = "200" ] || { echo "Timed out waiting for Redmine to serve /login"; docker logs redmine; exit 1; }
 
-      # This plugin ships no migrations, so there is no migration banner to
-      # grep for in the logs the way the sibling plugins do. Assert against the
-      # rendered page instead, which is a stronger check anyway: it proves the
+      # Assert against the rendered page rather than grepping the logs for a
+      # migration banner the way the sibling plugins do - a stronger check: it proves the
       # view hook ran and that the assets are actually reachable, not merely
       # that init.rb was parsed.
       - name: Assert the head hook injected the lightbox
