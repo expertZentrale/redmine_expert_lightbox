@@ -6,6 +6,17 @@
 
 ## [Unreleased]
 
+## [1.3.0] 2026-11-02
+
+### Hinzugefügt
+- **Spanisch, Französisch, Italienisch und Portugiesisch.** Die Oberfläche gibt es in sieben
+  Sprachen: `es`, `fr`, `it`, `pt` (Portugal) und `pt-BR` (Brasilien) neben Englisch und Deutsch.
+  Redmine zeigt jedem Benutzer die Sprache seines Kontos (oder die Standardsprache, wenn sie für
+  angemeldete Benutzer erzwungen ist) und fällt für jede andere auf Englisch zurück.
+- **Die Sprachdateien werden getestet.** `test/unit/locale_files_test.rb` schlägt fehl, wenn einer
+  Sprache ein Schlüssel aus `en.yml` fehlt, sie einen hat, den `en.yml` nicht hat, die Reihenfolge
+  abweicht oder ein `%{…}`-Platzhalter verloren geht.
+
 ## [1.2.0] 2026-09-29
 
 ### Hinzugefügt
